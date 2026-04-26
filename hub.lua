@@ -1,5 +1,5 @@
 -- ==========================================
--- THE SURVIVAL GAME: GOD HUB V22 (SUPREMO FINAL)
+-- THE SURVIVAL GAME: GOD HUB V23 (EVOLUÇÃO MÁXIMA)
 -- ==========================================
 
 local Players = game:GetService("Players")
@@ -24,6 +24,9 @@ local farmSeguroAtivado, ignorarAgua = false, true
 local savedRespawnCFrame = nil
 local velocidadeAtual, puloAtual = 16, 50
 
+-- Novos Estados VIP
+local vipSpoofAtivado, cosmeticosAtivados = false, false
+
 -- Filtros de Farm
 local farmFiltros = {Madeira=false, Pedra=false, Carvao=false, Cobre=false, Ferro=false, Ouro=false, Bluesteel=false, Obsidian=false, Arbusto=false}
 -- Filtros de ESP
@@ -37,7 +40,7 @@ local conexoes = {}
 -- CRIAÇÃO DA INTERFACE BASE
 -- ==========================================
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TSG_God_Hub_V22"
+screenGui.Name = "TSG_God_Hub_V23"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = player:WaitForChild("PlayerGui") end
@@ -54,7 +57,7 @@ Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
 
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(0.6, 0, 1, 0); titleText.Position = UDim2.new(0.05, 0, 0, 0)
-titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V22 (SUPREMO FINAL)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V23 (MAX EDITION)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleText.Font = Enum.Font.GothamBold; titleText.TextSize = 12; titleText.TextXAlignment = Enum.TextXAlignment.Left
 
 local closeBtn = Instance.new("TextButton", titleBar)
@@ -90,7 +93,7 @@ local pageFarm, tabFarm = criarAba("Farm")
 local pageEsp, tabEsp = criarAba("Visuals")
 local pageCombat, tabCombat = criarAba("Combate")
 local pagePlayer, tabPlayer = criarAba("Jogador")
-local pageTroll, tabTroll = criarAba("Outros")
+local pageVip, tabVip = criarAba("VIP/Trolls") -- Trolls renomeado para VIP
 
 pageFarm.Visible = true; tabFarm.TextColor3 = corTema
 
@@ -103,7 +106,7 @@ tabFarm.MouseButton1Click:Connect(function() mudarAba(tabFarm, pageFarm) end)
 tabEsp.MouseButton1Click:Connect(function() mudarAba(tabEsp, pageEsp) end)
 tabCombat.MouseButton1Click:Connect(function() mudarAba(tabCombat, pageCombat) end)
 tabPlayer.MouseButton1Click:Connect(function() mudarAba(tabPlayer, pagePlayer) end)
-tabTroll.MouseButton1Click:Connect(function() mudarAba(tabTroll, pageTroll) end)
+tabVip.MouseButton1Click:Connect(function() mudarAba(tabVip, pageVip) end)
 
 local function criarBotao(texto, parent, cor)
     local btn = Instance.new("TextButton", parent)
@@ -128,7 +131,7 @@ local valFarm = {
 }
 
 local valEsp = {
-    ["wolf"]="Animais", ["boar"]="Animais", ["horse"]="Animais", ["cow"]="Animais", ["bull"]="Animais", ["chicken"]="Animais",
+    ["wolf"]="Animais", ["boar"]="Animais", ["horse"]="Animais", ["cow"]="Animais", ["bull"]="Animais", ["chicken"]="Animais", ["moose"]="Animais",
     ["king"]="Bosses", ["boss"]="Bosses", ["tree"]="Arvores", ["bush"]="Arbustos",
     ["gold ore"]="Ouro", ["rock"]="Pedra", ["coal ore"]="Carvao", ["bluesteel ore"]="Bluesteel", ["obsidian ore"]="Obsidian", ["iron ore"]="Ferro", ["copper ore"]="Cobre"
 }
@@ -175,7 +178,7 @@ local function equiparMelhorArmaCombate()
     for _, item in pairs(itens) do
         if item:IsA("Tool") then
             local n = string.lower(item.Name)
-            if n:match("sword") or n:match("blade") or n:match("dagger") or n:match("katana") then espada = item; break
+            if n:match("sword") or n:match("blade") or n:match("dagger") or n:match("katana") or n:match("bluesteel") then espada = item; break
             elseif n:match("sharp rock") or n:match("pedra afiada") then pedraAfiada = item end
         end
     end
@@ -188,7 +191,7 @@ end
 -- ==========================================
 Instance.new("Frame", pageFarm).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Filtro de Farm", pageFarm)
+criarDivisoria("Filtro de Farm (Anti-Lixo)", pageFarm)
 local frameFiltrosFarm = Instance.new("Frame", pageFarm); frameFiltrosFarm.Size = UDim2.new(0.9, 0, 0, 110); frameFiltrosFarm.BackgroundTransparency = 1
 local layoutFiltrosFarm = Instance.new("UIGridLayout", frameFiltrosFarm); layoutFiltrosFarm.CellSize = UDim2.new(0.31, 0, 0, 25); layoutFiltrosFarm.CellPadding = UDim2.new(0, 5, 0, 5)
 for nome, _ in pairs(farmFiltros) do
@@ -196,16 +199,16 @@ for nome, _ in pairs(farmFiltros) do
     btnF.MouseButton1Click:Connect(function() farmFiltros[nome] = not farmFiltros[nome]; btnF.BackgroundColor3 = farmFiltros[nome] and corTema or Color3.fromRGB(60, 60, 60); btnF.TextColor3 = farmFiltros[nome] and Color3.fromRGB(0,0,0) or Color3.fromRGB(255,255,255) end)
 end
 
-criarDivisoria("Configurações do Farm", pageFarm)
-local btnFarmSeguro = criarBotao("Farm Seguro (Teleporta acima p/ Não tomar dano)", pageFarm, Color3.fromRGB(150, 100, 50))
+criarDivisoria("Configurações Avançadas do Farm", pageFarm)
+local btnFarmSeguro = criarBotao("Farm Seguro (Fica no topo / Não toma dano)", pageFarm, Color3.fromRGB(150, 100, 50))
 local btnIgnorarAgua = criarBotao("Ignorar Água (Não farma minérios afundados)", pageFarm, Color3.fromRGB(50, 100, 150))
-local btnAutoFarmNodes = criarBotao("Iniciar Auto-Farm (Otimizado)", pageFarm, Color3.fromRGB(50, 150, 80))
+local btnAutoFarmNodes = criarBotao("Iniciar Auto-Farm Inteligente", pageFarm, Color3.fromRGB(50, 150, 80))
 
-btnFarmSeguro.MouseButton1Click:Connect(function() farmSeguroAtivado = not farmSeguroAtivado; btnFarmSeguro.Text = farmSeguroAtivado and "Farm Seguro: LIGADO (Cima)" or "Farm Seguro (Teleporta acima p/ Não tomar dano)" end)
+btnFarmSeguro.MouseButton1Click:Connect(function() farmSeguroAtivado = not farmSeguroAtivado; btnFarmSeguro.Text = farmSeguroAtivado and "Farm Seguro: LIGADO (Fica no topo)" or "Farm Seguro (Fica no topo / Não toma dano)" end)
 btnIgnorarAgua.MouseButton1Click:Connect(function() ignorarAgua = not ignorarAgua; btnIgnorarAgua.Text = ignorarAgua and "Ignorar Água: LIGADO" or "Ignorar Água (Não farma minérios afundados)" end)
 
 btnAutoFarmNodes.MouseButton1Click:Connect(function()
-    autoFarmNodes = not autoFarmNodes; btnAutoFarmNodes.Text = autoFarmNodes and "Auto-Farm: RODANDO" or "Iniciar Auto-Farm (Otimizado)"
+    autoFarmNodes = not autoFarmNodes; btnAutoFarmNodes.Text = autoFarmNodes and "Auto-Farm: RODANDO" or "Iniciar Auto-Farm Inteligente"
     if autoFarmNodes then
         conexoes.farm = RunService.Heartbeat:Connect(function()
             local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -214,8 +217,7 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
             local maisProx = nil; local mDist = math.huge; local tipoR = nil
             for _, rec in ipairs(recursosCache) do
                 if farmFiltros[rec.tipo] and rec.part and rec.part.Parent then
-                    -- Ignorar água: O nível do mar no Roblox geralmente é 0 ou próximo a 14 no TSG. Vamos usar < 13
-                    if ignorarAgua and rec.part.Position.Y < 13 then continue end
+                    if ignorarAgua and rec.part.Position.Y < 13 then continue end -- Nível do mar aprox. 13-14
                     local dist = (rec.part.Position - hrp.Position).Magnitude
                     if dist < mDist then mDist = dist; maisProx = rec.part; tipoR = rec.tipo end
                 end
@@ -223,7 +225,7 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
             
             if maisProx then
                 equiparArmaFarm(tipoR)
-                local offset = farmSeguroAtivado and Vector3.new(0, 12, 0) or Vector3.new(0, 3, 4)
+                local offset = farmSeguroAtivado and Vector3.new(0, 10, 0) or Vector3.new(0, 3, 4)
                 hrp.CFrame = CFrame.new(maisProx.Position + offset, maisProx.Position)
                 local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end
             end
@@ -232,11 +234,11 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ABA 2: VISUALS (ESP FILTRADO)
+-- ABA 2: VISUALS (ESP MÁXIMO)
 -- ==========================================
 Instance.new("Frame", pageEsp).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Filtros do ESP", pageEsp)
+criarDivisoria("Rastreador Universal", pageEsp)
 local frameFiltrosEsp = Instance.new("Frame", pageEsp); frameFiltrosEsp.Size = UDim2.new(0.9, 0, 0, 110); frameFiltrosEsp.BackgroundTransparency = 1
 local layoutFiltrosEsp = Instance.new("UIGridLayout", frameFiltrosEsp); layoutFiltrosEsp.CellSize = UDim2.new(0.31, 0, 0, 25); layoutFiltrosEsp.CellPadding = UDim2.new(0, 5, 0, 5)
 for nome, _ in pairs(espFiltros) do
@@ -244,16 +246,14 @@ for nome, _ in pairs(espFiltros) do
     btnF.MouseButton1Click:Connect(function() espFiltros[nome] = not espFiltros[nome]; btnF.BackgroundColor3 = espFiltros[nome] and corTema or Color3.fromRGB(60, 60, 60); btnF.TextColor3 = espFiltros[nome] and Color3.fromRGB(0,0,0) or Color3.fromRGB(255,255,255) end)
 end
 
-local btnLigaEsp = criarBotao("Ligar ESPs Selecionados", pageEsp, Color3.fromRGB(200, 150, 0))
+local btnLigaEsp = criarBotao("Ligar ESP (Localizar pelo Mapa)", pageEsp, Color3.fromRGB(200, 150, 0))
 local espObjetosConexao = nil
 
 btnLigaEsp.MouseButton1Click:Connect(function()
-    espMineriosAtivado = not espMineriosAtivado; btnLigaEsp.Text = espMineriosAtivado and "ESP Ativado" or "Ligar ESPs Selecionados"
+    espMineriosAtivado = not espMineriosAtivado; btnLigaEsp.Text = espMineriosAtivado and "ESP Ativado (Visualizando Alvos)" or "Ligar ESP (Localizar pelo Mapa)"
     if espMineriosAtivado then
         espObjetosConexao = RunService.RenderStepped:Connect(function()
-            -- Limpa antigos não filtrados
             for _, obj in pairs(workspace:GetDescendants()) do if obj:FindFirstChild("TsgESP") then obj.TsgESP:Destroy() end end
-            -- Aplica nos novos da cache
             for _, item in ipairs(espCache) do
                 if espFiltros[item.tipo] and item.obj.Parent and item.pPart then
                     local bgui = Instance.new("BillboardGui", item.pPart); bgui.Name = "TsgESP"; bgui.Size = UDim2.new(0, 100, 0, 30); bgui.AlwaysOnTop = true
@@ -268,16 +268,21 @@ btnLigaEsp.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ABA 3: COMBATE (KILL AURA MÁXIMA)
+-- ABA 3: COMBATE E SOBREVIVÊNCIA
 -- ==========================================
 Instance.new("Frame", pageCombat).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Sistemas de Mira e Dano", pageCombat)
-local btnKillAura = criarBotao("Kill Aura (Players, Mobs e Bosses)", pageCombat, Color3.fromRGB(150, 50, 50))
-local txtKillInfo = Instance.new("TextLabel", pageCombat); txtKillInfo.Size = UDim2.new(0.9, 0, 0, 20); txtKillInfo.BackgroundTransparency = 1; txtKillInfo.Text = "Usa Espada ou Pedra Afiada automaticamente."; txtKillInfo.TextColor3 = Color3.fromRGB(150,150,150); txtKillInfo.Font = Enum.Font.Gotham; txtKillInfo.TextSize = 11
+criarDivisoria("Kill Aura e Dano", pageCombat)
+local btnKillAura = criarBotao("Kill Aura (Players, Bosses, Animais)", pageCombat, Color3.fromRGB(150, 50, 50))
+local txtKillInfo = Instance.new("TextLabel", pageCombat); txtKillInfo.Size = UDim2.new(0.9, 0, 0, 20); txtKillInfo.BackgroundTransparency = 1; txtKillInfo.Text = "Usa a melhor Espada ou Pedra Afiada automaticamente."; txtKillInfo.TextColor3 = Color3.fromRGB(150,150,150); txtKillInfo.Font = Enum.Font.Gotham; txtKillInfo.TextSize = 11
+
+criarDivisoria("Defesa do Jogador", pageCombat)
+local btnShrink = criarBotao("Reduzir Hitbox (Ficar minúsculo)", pageCombat, Color3.fromRGB(150, 100, 150))
+local btnStamina = criarBotao("Estamina Infinita", pageCombat)
+local btnFome = criarBotao("Sem Fome (Travar Barra)", pageCombat)
 
 btnKillAura.MouseButton1Click:Connect(function()
-    killAuraAtivado = not killAuraAtivado; btnKillAura.Text = killAuraAtivado and "Kill Aura: ATIVADA EM TUDO" or "Kill Aura (Players, Mobs e Bosses)"
+    killAuraAtivado = not killAuraAtivado; btnKillAura.Text = killAuraAtivado and "Kill Aura: ATIVADA EM TUDO" or "Kill Aura (Players, Bosses, Animais)"
     if killAuraAtivado then
         conexoes.killAura = RunService.RenderStepped:Connect(function()
             local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -305,26 +310,8 @@ btnKillAura.MouseButton1Click:Connect(function()
     else if conexoes.killAura then conexoes.killAura:Disconnect() end end
 end)
 
--- ==========================================
--- ABA 4: JOGADOR (RESPAWN, HITBOX, PESO)
--- ==========================================
-Instance.new("Frame", pagePlayer).Size = UDim2.new(1,0,0,1)
-
-criarDivisoria("Defesa e Forma Física", pagePlayer)
-local btnShrink = criarBotao("Reduzir Hitbox ao Máximo (Modo Formiga)", pagePlayer, Color3.fromRGB(150, 100, 150))
-local btnPeso = criarBotao("Forçar Velocidade (Ignora Inventário Cheio)", pagePlayer, Color3.fromRGB(100, 50, 200))
-local inputVel = Instance.new("Frame", pagePlayer); inputVel.Size = UDim2.new(0.9, 0, 0, 35); inputVel.BackgroundTransparency = 1
-local bVel = criarBotao("Velocidade Base (1-10)", inputVel); bVel.Size = UDim2.new(0.7, 0, 1, 0)
-local tVel = Instance.new("TextBox", inputVel); tVel.Size = UDim2.new(0.25, 0, 1, 0); tVel.Position = UDim2.new(0.75, 0, 0, 0); tVel.BackgroundColor3 = Color3.fromRGB(30, 30, 30); tVel.Text = "1"; tVel.TextColor3 = corTema; tVel.Font = Enum.Font.GothamBold; Instance.new("UICorner", tVel)
-bVel.MouseButton1Click:Connect(function() local v = tonumber(tVel.Text) or 1; v = math.clamp(v, 1, 10); tVel.Text = tostring(v); velocidadeAtual = 16 * v end)
-
-criarDivisoria("Respawn e Spoof", pagePlayer)
-local btnSalvarRespawn = criarBotao("1. Marcar Local de Respawn Aqui", pagePlayer, Color3.fromRGB(0, 150, 200))
-local btnTpRespawn = criarBotao("2. Teleportar para Local Salvo Agora", pagePlayer, Color3.fromRGB(0, 100, 150))
-local btnSpoofRebirth = criarBotao("Spoof Visual: 100 Rebirths / VIP", pagePlayer, Color3.fromRGB(200, 150, 0))
-
 btnShrink.MouseButton1Click:Connect(function()
-    hitBoxPequena = not hitBoxPequena; btnShrink.Text = hitBoxPequena and "Hitbox Extremamente Reduzida" or "Reduzir Hitbox ao Máximo (Modo Formiga)"
+    hitBoxPequena = not hitBoxPequena; btnShrink.Text = hitBoxPequena and "Hitbox Extremamente Reduzida" or "Reduzir Hitbox (Ficar minúsculo)"
     local char = player.Character; local hum = char and char:FindFirstChild("Humanoid")
     if char and hum then
         if hitBoxPequena then
@@ -337,6 +324,52 @@ btnShrink.MouseButton1Click:Connect(function()
     end
 end)
 
+btnStamina.MouseButton1Click:Connect(function() staminaInfinita = not staminaInfinita; btnStamina.Text = staminaInfinita and "Estamina: INFINITA" or "Estamina Infinita" end)
+btnFome.MouseButton1Click:Connect(function() semFomeAtivado = not semFomeAtivado; btnFome.Text = semFomeAtivado and "Sem Fome: ATIVADO" or "Sem Fome (Travar Barra)" end)
+
+-- ==========================================
+-- ABA 4: JOGADOR (PESO, REBIRTH E RESPAWN)
+-- ==========================================
+Instance.new("Frame", pagePlayer).Size = UDim2.new(1,0,0,1)
+
+criarDivisoria("Controle de Corpo", pagePlayer)
+local btnPeso = criarBotao("Forçar Velocidade (Ignora Inventário)", pagePlayer, Color3.fromRGB(100, 50, 200))
+local inputVel = Instance.new("Frame", pagePlayer); inputVel.Size = UDim2.new(0.9, 0, 0, 35); inputVel.BackgroundTransparency = 1
+local bVel = criarBotao("Velocidade Base (1-10)", inputVel); bVel.Size = UDim2.new(0.7, 0, 1, 0)
+local tVel = Instance.new("TextBox", inputVel); tVel.Size = UDim2.new(0.25, 0, 1, 0); tVel.Position = UDim2.new(0.75, 0, 0, 0); tVel.BackgroundColor3 = Color3.fromRGB(30, 30, 30); tVel.Text = "1"; tVel.TextColor3 = corTema; tVel.Font = Enum.Font.GothamBold; Instance.new("UICorner", tVel)
+bVel.MouseButton1Click:Connect(function() local v = tonumber(tVel.Text) or 1; v = math.clamp(v, 1, 10); tVel.Text = tostring(v); velocidadeAtual = 16 * v end)
+
+criarDivisoria("Automação Level Máximo", pagePlayer)
+local btnAutoRebirth = criarBotao("Auto Rebirth (Simula Lvl 25 e Clica na GUI)", pagePlayer, Color3.fromRGB(150, 50, 200))
+
+criarDivisoria("Respawn e Spoof", pagePlayer)
+local btnSalvarRespawn = criarBotao("1. Marcar Local de Respawn Aqui", pagePlayer, Color3.fromRGB(0, 150, 200))
+local btnTpRespawn = criarBotao("2. Teleportar para Local Salvo Agora", pagePlayer, Color3.fromRGB(0, 100, 150))
+
+btnPeso.MouseButton1Click:Connect(function() inventarioIlimitado = not inventarioIlimitado; btnPeso.Text = inventarioIlimitado and "Ignorar Peso: ATIVADO" or "Forçar Velocidade (Ignora Inventário)" end)
+
+-- O NOVO AUTO-REBIRTH: Burla os stats locais e aperta o botão do Gui
+btnAutoRebirth.MouseButton1Click:Connect(function()
+    autoRebirthAtivado = not autoRebirthAtivado; btnAutoRebirth.Text = autoRebirthAtivado and "Auto Rebirth: RODANDO" or "Auto Rebirth (Simula Lvl 25 e Clica na GUI)"
+    if autoRebirthAtivado then
+        conexoes.rebirth = RunService.Heartbeat:Connect(function()
+            -- Força nível 25 nas skills locais para liberar o botão
+            local skills = player:FindFirstChild("Skills") or player:FindFirstChild("leaderstats") or player
+            for _, s in pairs({"Mining", "Woodcutting", "Crafting", "Food", "Cooking"}) do
+                local stat = skills:FindFirstChild(s, true)
+                if stat and (stat:IsA("IntValue") or stat:IsA("NumberValue")) then stat.Value = 25 end
+            end
+            
+            -- Clica no botão GUI de Rebirth
+            for _, gui in pairs(player.PlayerGui:GetDescendants()) do
+                if gui:IsA("TextButton") and (string.lower(gui.Text):match("rebirth") or string.lower(gui.Name):match("rebirth")) then
+                    pcall(function() for _, conn in pairs(getconnections(gui.MouseButton1Click)) do conn:Fire() end end)
+                end
+            end
+        end)
+    else if conexoes.rebirth then conexoes.rebirth:Disconnect() end end
+end)
+
 btnSalvarRespawn.MouseButton1Click:Connect(function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         savedRespawnCFrame = player.Character.HumanoidRootPart.CFrame; btnSalvarRespawn.Text = "Local Marcado!"
@@ -345,29 +378,20 @@ btnSalvarRespawn.MouseButton1Click:Connect(function()
 end)
 
 btnTpRespawn.MouseButton1Click:Connect(function()
-    if savedRespawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = savedRespawnCFrame
-    end
+    if savedRespawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = savedRespawnCFrame end
 end)
 
-btnPeso.MouseButton1Click:Connect(function() inventarioIlimitado = not inventarioIlimitado; btnPeso.Text = inventarioIlimitado and "Ignorar Peso: ATIVADO" or "Forçar Velocidade (Ignora Inventário Cheio)" end)
-
-btnSpoofRebirth.MouseButton1Click:Connect(function()
-    -- ALERTA: Apenas Visual
-    local ls = player:FindFirstChild("leaderstats")
-    if ls then
-        local r = ls:FindFirstChild("Rebirths") or ls:FindFirstChild("Renascimentos")
-        if r then r.Value = 100 end
-    end
-    btnSpoofRebirth.Text = "Spoof Visual Aplicado!"
-    task.wait(2); btnSpoofRebirth.Text = "Spoof Visual: 100 Rebirths / VIP"
-end)
-
--- Sistema de RenderStepped para Bypassar a Lentidão
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChild("Humanoid") then
         if inventarioIlimitado then char.Humanoid.WalkSpeed = velocidadeAtual end
+        if staminaInfinita then local s = char:FindFirstChild("Stamina") or player:FindFirstChild("Stamina"); if s and s:IsA("NumberValue") then s.Value = 100 end end
+        if semFomeAtivado then local f = player:FindFirstChild("Hunger") or char:FindFirstChild("Hunger"); if f and f:IsA("NumberValue") then f.Value = 100 end end
+        if char.Humanoid.Health <= 0 then
+            for _, gui in pairs(player.PlayerGui:GetDescendants()) do
+                if gui:IsA("TextButton") and (gui.Text:lower():match("spawn") or gui.Text:lower():match("respawn")) then pcall(function() for _, conn in pairs(getconnections(gui.MouseButton1Click)) do conn:Fire() end end) end
+            end
+        end
     end
 end)
 
@@ -385,49 +409,50 @@ player.CharacterAdded:Connect(function(char)
 end)
 
 -- ==========================================
--- ABA 5: OUTROS E TROLLS
+-- ABA 5: VIP E GAMEPASSES VISUAIS
 -- ==========================================
-Instance.new("Frame", pageTroll).Size = UDim2.new(1,0,0,1)
+Instance.new("Frame", pageVip).Size = UDim2.new(1,0,0,1)
 
-local btnAutoRebirth = criarBotao("Auto-Rebirth Real (Clica na Estátua)", pageTroll, Color3.fromRGB(150, 50, 200))
-local btnAutoPlant = criarBotao("Auto-Plantar Sementes Próximas", pageTroll, Color3.fromRGB(150, 150, 50))
-local btnInvis = criarBotao("Ficar Invisível (Auto-Respawn)", pageTroll)
+local infoVip = Instance.new("TextLabel", pageVip)
+infoVip.Size = UDim2.new(0.9, 0, 0, 55); infoVip.BackgroundTransparency = 1
+infoVip.Text = "AVISO: Estes botões alteram a UI para simular Gamepasses e VIPs no seu PC. Como o servidor da Roblox é fechado, multiplicadores são visuais."
+infoVip.TextColor3 = Color3.fromRGB(255, 100, 100); infoVip.TextWrapped = true; infoVip.Font = Enum.Font.GothamBold; infoVip.TextSize = 11
 
-btnAutoPlant.MouseButton1Click:Connect(function()
-    autoPlantarAtivado = not autoPlantarAtivado; btnAutoPlant.Text = autoPlantarAtivado and "Auto-Plantar: LIGADO" or "Auto-Plantar Sementes Próximas"
-    if autoPlantarAtivado then
-        conexoes.plant = RunService.Heartbeat:Connect(function()
-            local char = player.Character; local bp = player:FindFirstChild("Backpack"); if not char or not bp then return end
-            local soloProximo = false
-            for _, obj in pairs(workspace:GetDescendants()) do if obj.Name == "Soil" and obj:IsA("BasePart") and (obj.Position - char.HumanoidRootPart.Position).Magnitude < 10 then soloProximo = true; break end end
-            local itens = bp:GetChildren(); for _, v in pairs(char:GetChildren()) do table.insert(itens, v) end
-            if not soloProximo then
-                for _, item in pairs(itens) do if item:IsA("Tool") and string.lower(item.Name):match("shovel") then if item.Parent ~= char then char.Humanoid:EquipTool(item) end; item:Activate(); break end end
-            else
-                for _, item in pairs(itens) do if item:IsA("Tool") and (string.lower(item.Name):match("seed") or string.lower(item.Name):match("sapling") or string.lower(item.Name):match("acorn")) then if item.Parent ~= char then char.Humanoid:EquipTool(item) end; item:Activate(); break end end
+criarDivisoria("Vantagens Premium", pageVip)
+local btnVipSpoof = criarBotao("Aplicar Gamepasses 2x (XP, Recursos, Dano)", pageVip, Color3.fromRGB(200, 150, 0))
+local btnCosmetics = criarBotao("Desbloquear Montarias Perigosas (Client)", pageVip, Color3.fromRGB(150, 50, 200))
+
+btnVipSpoof.MouseButton1Click:Connect(function()
+    vipSpoofAtivado = not vipSpoofAtivado; btnVipSpoof.Text = vipSpoofAtivado and "Vantagens 2x VIP Aplicadas!" or "Aplicar Gamepasses 2x (XP, Recursos, Dano)"
+    if vipSpoofAtivado then
+        -- Simulação Visual de 2x nas UIs locais
+        for _, gui in pairs(player.PlayerGui:GetDescendants()) do
+            if gui:IsA("TextLabel") and gui.Text:match("XP") then
+                gui.Text = "2x " .. gui.Text
+            elseif gui:IsA("TextLabel") and gui.Text:match("Damage") then
+                gui.Text = "Dano 200% (Spoofed)"
             end
-        end)
-    else if conexoes.plant then conexoes.plant:Disconnect() end end
+        end
+    end
 end)
 
-btnAutoRebirth.MouseButton1Click:Connect(function()
-    autoRebirthAtivado = not autoRebirthAtivado; btnAutoRebirth.Text = autoRebirthAtivado and "Auto-Rebirth Real: ATIVO" or "Auto-Rebirth Real (Clica na Estátua)"
-    if autoRebirthAtivado then
-        conexoes.rebirth = RunService.Heartbeat:Connect(function()
-            for _, prompt in pairs(workspace:GetDescendants()) do
-                if prompt:IsA("ProximityPrompt") and string.lower(prompt.ActionText):match("rebirth") then fireproximityprompt(prompt) end
+btnCosmetics.MouseButton1Click:Connect(function()
+    cosmeticosAtivados = not cosmeticosAtivados; btnCosmetics.Text = cosmeticosAtivados and "Montarias Desbloqueadas Localmente!" or "Desbloquear Montarias Perigosas (Client)"
+    if cosmeticosAtivados then
+        -- Se o jogo guardar cosméticos no ReplicatedStorage, tentamos clonar para o player
+        local rep = game:GetService("ReplicatedStorage")
+        local mounts = rep:FindFirstChild("Mounts") or rep:FindFirstChild("Cosmetics")
+        if mounts then
+            for _, mount in pairs(mounts:GetChildren()) do
+                -- Exemplo de tentar puxar pro char
+                if mount:IsA("Model") then mount:Clone().Parent = player.Character end
             end
-        end)
-    else if conexoes.rebirth then conexoes.rebirth:Disconnect() end end
-end)
-
-btnInvis.MouseButton1Click:Connect(function()
-    invisivel = not invisivel; btnInvis.Text = invisivel and "Invisibilidade: ATIVADA" or "Ficar Invisível (Auto-Respawn)"
-    if player.Character then for _, p in pairs(player.Character:GetDescendants()) do if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Transparency = invisivel and 1 or 0 elseif p:IsA("Decal") then p.Transparency = invisivel and 1 or 0 end end end
+        end
+    end
 end)
 
 -- ==========================================
--- LÓGICA DE JANELA
+-- LÓGICA GERAL DA JANELA (MINIMIZAR/FECHAR)
 -- ==========================================
 minBtn.MouseButton1Click:Connect(function()
     minimizado = not minimizado
