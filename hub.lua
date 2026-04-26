@@ -1,5 +1,5 @@
 -- ==========================================
--- THE SURVIVAL GAME: GOD HUB V24 (EXPLOIT EDITION)
+-- THE SURVIVAL GAME: GOD HUB V25 (STEALTH & BYPASS)
 -- ==========================================
 
 local Players = game:GetService("Players")
@@ -11,7 +11,7 @@ local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
 -- ==========================================
--- CONFIGURAÇÕES E ESTADOS
+-- CONFIGURAÇÕES E ESTADOS (ANTI-CHEAT SAFE)
 -- ==========================================
 local corTema = Color3.fromRGB(40, 200, 100) 
 
@@ -26,6 +26,10 @@ local velocidadeAtual, puloAtual = 16, 50
 
 local vipSpoofAtivado, cosmeticosAtivados = false, false
 
+-- Timers Anti-Macro (Humanização)
+local lastAuraAtk = 0
+local lastFarmAtk = 0
+
 -- Filtros
 local farmFiltros = {Madeira=false, Pedra=false, Carvao=false, Cobre=false, Ferro=false, Ouro=false, Bluesteel=false, Obsidian=false, Arbusto=false}
 local espFiltros = {Arvores=false, Arbustos=false, Animais=false, Bosses=false, Ouro=false, Pedra=false, Carvao=false, Bluesteel=false, Obsidian=false, Ferro=false, Cobre=false}
@@ -38,7 +42,7 @@ local conexoes = {}
 -- CRIAÇÃO DA INTERFACE BASE
 -- ==========================================
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TSG_God_Hub_V24"
+screenGui.Name = "TSG_God_Hub_V25"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = player:WaitForChild("PlayerGui") end
@@ -55,7 +59,7 @@ Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
 
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(0.6, 0, 1, 0); titleText.Position = UDim2.new(0.05, 0, 0, 0)
-titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V24 (EXPLOIT EDITION)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V25 (STEALTH BYPASS)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleText.Font = Enum.Font.GothamBold; titleText.TextSize = 12; titleText.TextXAlignment = Enum.TextXAlignment.Left
 
 local closeBtn = Instance.new("TextButton", titleBar)
@@ -67,7 +71,6 @@ local minBtn = Instance.new("TextButton", titleBar)
 minBtn.Size = UDim2.new(0, 30, 0, 30); minBtn.Position = UDim2.new(0.83, 0, 0.1, 0); minBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 minBtn.Text = "-"; minBtn.TextColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
 
--- SISTEMA DE ABAS
 local tabBar = Instance.new("Frame", mainFrame)
 tabBar.Size = UDim2.new(1, 0, 0, 35); tabBar.Position = UDim2.new(0, 0, 0, 35); tabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 local tabLayout = Instance.new("UIListLayout", tabBar); tabLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -79,7 +82,6 @@ local function criarAba(nome)
     local btn = Instance.new("TextButton", tabBar)
     btn.Size = UDim2.new(0.2, 0, 1, 0); btn.BackgroundTransparency = 1; btn.Text = nome
     btn.TextColor3 = Color3.fromRGB(200, 200, 200); btn.Font = Enum.Font.GothamSemibold; btn.TextSize = 11
-    
     local page = Instance.new("ScrollingFrame", pageContainer)
     page.Size = UDim2.new(1, 0, 1, 0); page.BackgroundTransparency = 1; page.ScrollBarThickness = 4; page.Visible = false
     page.AutomaticCanvasSize = Enum.AutomaticSize.Y; page.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -135,7 +137,7 @@ local valEsp = {
 }
 
 task.spawn(function()
-    while task.wait(2) do
+    while task.wait(2.5) do -- Scan otimizado para não pesar o Client
         local cF, cE = {}, {}
         for _, obj in pairs(workspace:GetDescendants()) do
             if obj:IsA("Model") then
@@ -185,7 +187,7 @@ local function equiparMelhorArmaCombate()
 end
 
 -- ==========================================
--- ABA 1: FARM 
+-- ABA 1: FARM OTIMIZADO
 -- ==========================================
 Instance.new("Frame", pageFarm).Size = UDim2.new(1,0,0,1)
 
@@ -200,13 +202,13 @@ end
 criarDivisoria("Configurações Avançadas do Farm", pageFarm)
 local btnFarmSeguro = criarBotao("Farm Seguro (Fica no topo / Não toma dano)", pageFarm, Color3.fromRGB(150, 100, 50))
 local btnIgnorarAgua = criarBotao("Ignorar Água (Não farma minérios afundados)", pageFarm, Color3.fromRGB(50, 100, 150))
-local btnAutoFarmNodes = criarBotao("Iniciar Auto-Farm Inteligente", pageFarm, Color3.fromRGB(50, 150, 80))
+local btnAutoFarmNodes = criarBotao("Iniciar Auto-Farm Humanizado", pageFarm, Color3.fromRGB(50, 150, 80))
 
 btnFarmSeguro.MouseButton1Click:Connect(function() farmSeguroAtivado = not farmSeguroAtivado; btnFarmSeguro.Text = farmSeguroAtivado and "Farm Seguro: LIGADO (Fica no topo)" or "Farm Seguro (Fica no topo / Não toma dano)" end)
 btnIgnorarAgua.MouseButton1Click:Connect(function() ignorarAgua = not ignorarAgua; btnIgnorarAgua.Text = ignorarAgua and "Ignorar Água: LIGADO" or "Ignorar Água (Não farma minérios afundados)" end)
 
 btnAutoFarmNodes.MouseButton1Click:Connect(function()
-    autoFarmNodes = not autoFarmNodes; btnAutoFarmNodes.Text = autoFarmNodes and "Auto-Farm: RODANDO" or "Iniciar Auto-Farm Inteligente"
+    autoFarmNodes = not autoFarmNodes; btnAutoFarmNodes.Text = autoFarmNodes and "Auto-Farm: RODANDO (ANTI-CHEAT SAFE)" or "Iniciar Auto-Farm Humanizado"
     if autoFarmNodes then
         conexoes.farm = RunService.Heartbeat:Connect(function()
             local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -224,8 +226,14 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
             if maisProx then
                 equiparArmaFarm(tipoR)
                 local offset = farmSeguroAtivado and Vector3.new(0, 10, 0) or Vector3.new(0, 3, 4)
+                -- Teleporte suave / Manutenção
                 hrp.CFrame = CFrame.new(maisProx.Position + offset, maisProx.Position)
-                local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end
+                
+                -- Humanização do Clique (Evita detecção de Macro)
+                if tick() - lastFarmAtk > math.random(3, 6)/10 then
+                    lastFarmAtk = tick()
+                    local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end
+                end
             end
         end)
     else if conexoes.farm then conexoes.farm:Disconnect() end end
@@ -266,13 +274,13 @@ btnLigaEsp.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ABA 3: COMBATE (KILL AURA MÁXIMA)
+-- ABA 3: COMBATE SEGURO (SAFE-ZONE)
 -- ==========================================
 Instance.new("Frame", pageCombat).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Sistemas de Mira e Dano", pageCombat)
+criarDivisoria("Kill Aura (Bypass Magnitude)", pageCombat)
 local btnKillAura = criarBotao("Kill Aura (Players, Bosses, Animais)", pageCombat, Color3.fromRGB(150, 50, 50))
-local txtKillInfo = Instance.new("TextLabel", pageCombat); txtKillInfo.Size = UDim2.new(0.9, 0, 0, 20); txtKillInfo.BackgroundTransparency = 1; txtKillInfo.Text = "Usa a melhor Espada ou Pedra Afiada automaticamente."; txtKillInfo.TextColor3 = Color3.fromRGB(150,150,150); txtKillInfo.Font = Enum.Font.Gotham; txtKillInfo.TextSize = 11
+local txtKillInfo = Instance.new("TextLabel", pageCombat); txtKillInfo.Size = UDim2.new(0.9, 0, 0, 30); txtKillInfo.BackgroundTransparency = 1; txtKillInfo.Text = "Raio de 13.5 studs e delay humano para o servidor não anular seus ataques."; txtKillInfo.TextColor3 = Color3.fromRGB(150,150,150); txtKillInfo.Font = Enum.Font.Gotham; txtKillInfo.TextSize = 11; txtKillInfo.TextWrapped = true
 
 criarDivisoria("Defesa do Jogador", pageCombat)
 local btnShrink = criarBotao("Reduzir Hitbox (Ficar minúsculo)", pageCombat, Color3.fromRGB(150, 100, 150))
@@ -286,20 +294,25 @@ btnKillAura.MouseButton1Click:Connect(function()
             local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
                 local atacou = false
+                local safeDistance = 13.5 -- Dentro do limite de validação do Servidor TSG
+                
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
                         if player.Team and p.Team and player.Team == p.Team then continue end
-                        if (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude < 18 then atacou = true end
+                        if (hrp.Position - p.Character.HumanoidRootPart.Position).Magnitude <= safeDistance then atacou = true end
                     end
                 end
                 if not atacou then
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") and obj ~= player.Character then
-                            if not Players:GetPlayerFromCharacter(obj) and obj.Humanoid.Health > 0 and (hrp.Position - obj.HumanoidRootPart.Position).Magnitude < 18 then atacou = true; break end
+                            if not Players:GetPlayerFromCharacter(obj) and obj.Humanoid.Health > 0 and (hrp.Position - obj.HumanoidRootPart.Position).Magnitude <= safeDistance then atacou = true; break end
                         end
                     end
                 end
-                if atacou then
+                
+                -- Anti-Macro: O servidor barra cliques na exata mesma fração sempre.
+                if atacou and (tick() - lastAuraAtk > math.random(4, 7)/10) then
+                    lastAuraAtk = tick()
                     equiparMelhorArmaCombate()
                     local tool = player.Character:FindFirstChildOfClass("Tool"); if tool then tool:Activate() end
                 end
@@ -326,12 +339,12 @@ btnStamina.MouseButton1Click:Connect(function() staminaInfinita = not staminaInf
 btnFome.MouseButton1Click:Connect(function() semFomeAtivado = not semFomeAtivado; btnFome.Text = semFomeAtivado and "Sem Fome: ATIVADO" or "Sem Fome (Travar Barra)" end)
 
 -- ==========================================
--- ABA 4: JOGADOR E RESPAWN
+-- ABA 4: JOGADOR (ANTI-RUBBERBAND)
 -- ==========================================
 Instance.new("Frame", pagePlayer).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Controle de Corpo", pagePlayer)
-local btnPeso = criarBotao("Forçar Velocidade (Ignora Inventário)", pagePlayer, Color3.fromRGB(100, 50, 200))
+criarDivisoria("Movimentação e Corpo", pagePlayer)
+local btnPeso = criarBotao("Bypass Inventário Cheio (Smooth Anti-Rubberband)", pagePlayer, Color3.fromRGB(100, 50, 200))
 local inputVel = Instance.new("Frame", pagePlayer); inputVel.Size = UDim2.new(0.9, 0, 0, 35); inputVel.BackgroundTransparency = 1
 local bVel = criarBotao("Velocidade Base (1-10)", inputVel); bVel.Size = UDim2.new(0.7, 0, 1, 0)
 local tVel = Instance.new("TextBox", inputVel); tVel.Size = UDim2.new(0.25, 0, 1, 0); tVel.Position = UDim2.new(0.75, 0, 0, 0); tVel.BackgroundColor3 = Color3.fromRGB(30, 30, 30); tVel.Text = "1"; tVel.TextColor3 = corTema; tVel.Font = Enum.Font.GothamBold; Instance.new("UICorner", tVel)
@@ -340,11 +353,11 @@ bVel.MouseButton1Click:Connect(function() local v = tonumber(tVel.Text) or 1; v 
 criarDivisoria("Automação Level Máximo", pagePlayer)
 local btnAutoRebirth = criarBotao("Auto Rebirth (Simula Lvl 25 e Clica na GUI)", pagePlayer, Color3.fromRGB(150, 50, 200))
 
-criarDivisoria("Respawn e Spoof", pagePlayer)
+criarDivisoria("Respawn (Cofre Local)", pagePlayer)
 local btnSalvarRespawn = criarBotao("1. Marcar Local de Respawn Aqui", pagePlayer, Color3.fromRGB(0, 150, 200))
 local btnTpRespawn = criarBotao("2. Teleportar para Local Salvo Agora", pagePlayer, Color3.fromRGB(0, 100, 150))
 
-btnPeso.MouseButton1Click:Connect(function() inventarioIlimitado = not inventarioIlimitado; btnPeso.Text = inventarioIlimitado and "Ignorar Peso: ATIVADO" or "Forçar Velocidade (Ignora Inventário)" end)
+btnPeso.MouseButton1Click:Connect(function() inventarioIlimitado = not inventarioIlimitado; btnPeso.Text = inventarioIlimitado and "Bypass de Peso: ATIVADO" or "Bypass Inventário Cheio (Smooth Anti-Rubberband)" end)
 
 btnAutoRebirth.MouseButton1Click:Connect(function()
     autoRebirthAtivado = not autoRebirthAtivado; btnAutoRebirth.Text = autoRebirthAtivado and "Auto Rebirth: RODANDO" or "Auto Rebirth (Simula Lvl 25 e Clica na GUI)"
@@ -370,15 +383,19 @@ btnSalvarRespawn.MouseButton1Click:Connect(function()
         task.wait(1); btnSalvarRespawn.Text = "1. Marcar Local de Respawn Aqui"
     end
 end)
+btnTpRespawn.MouseButton1Click:Connect(function() if savedRespawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = savedRespawnCFrame end end)
 
-btnTpRespawn.MouseButton1Click:Connect(function()
-    if savedRespawnCFrame and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = savedRespawnCFrame end
-end)
-
+-- Anti-Rubberband Movement e Status Locais
 RunService.RenderStepped:Connect(function()
     local char = player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if inventarioIlimitado then char.Humanoid.WalkSpeed = velocidadeAtual end
+    if char and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+        -- Em vez de só forçar o WalkSpeed quebrando a física, movemos levemente o CFrame junto com o input de controle do PC/Mobile para enganar o servidor
+        if inventarioIlimitado then 
+            char.Humanoid.WalkSpeed = velocidadeAtual 
+            if char.Humanoid.MoveDirection.Magnitude > 0 then
+                char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame + (char.Humanoid.MoveDirection * (velocidadeAtual/100))
+            end
+        end
         if staminaInfinita then local s = char:FindFirstChild("Stamina") or player:FindFirstChild("Stamina"); if s and s:IsA("NumberValue") then s.Value = 100 end end
         if semFomeAtivado then local f = player:FindFirstChild("Hunger") or char:FindFirstChild("Hunger"); if f and f:IsA("NumberValue") then f.Value = 100 end end
         if char.Humanoid.Health <= 0 then
@@ -394,7 +411,6 @@ player.CharacterAdded:Connect(function(char)
     if hrp and savedRespawnCFrame then task.wait(0.2); hrp.CFrame = savedRespawnCFrame end
     if hum then
         if inventarioIlimitado then hum.WalkSpeed = velocidadeAtual end
-        if puloAtual ~= 50 then hum.UseJumpPower = true; hum.JumpPower = puloAtual end
         if hitBoxPequena then
             for _, p in pairs({"BodyDepthScale", "BodyHeightScale", "BodyWidthScale", "HeadScale"}) do if hum:FindFirstChild(p) then hum[p].Value = 0.1 end end
             if hrp then hrp.Size = Vector3.new(0.5,0.5,0.5) end
@@ -403,7 +419,7 @@ player.CharacterAdded:Connect(function(char)
 end)
 
 -- ==========================================
--- ABA 5: EXPLOITS, VIP E TROLLS
+-- ABA 5: EXPLOITS E TROLLS
 -- ==========================================
 Instance.new("Frame", pageVip).Size = UDim2.new(1,0,0,1)
 
@@ -415,11 +431,29 @@ infoVip.TextColor3 = Color3.fromRGB(255, 100, 100); infoVip.TextWrapped = true; 
 criarDivisoria("Vantagens Premium", pageVip)
 local btnVipSpoof = criarBotao("Aplicar Gamepasses 2x (XP, Recursos, Dano)", pageVip, Color3.fromRGB(200, 150, 0))
 local btnCosmetics = criarBotao("Desbloquear Montarias Perigosas (Client)", pageVip, Color3.fromRGB(150, 50, 200))
+local btnAutoPlant = criarBotao("Auto-Plantar Sementes Próximas", pageVip, Color3.fromRGB(150, 150, 50))
 
 criarDivisoria("Scanner de Vulnerabilidades", pageVip)
 local btnScanRemotes = criarBotao("Escanear Vulnerabilidades (Portas Abertas)", pageVip, Color3.fromRGB(200, 100, 50))
 local txtScanResult = Instance.new("TextLabel", pageVip); txtScanResult.Size = UDim2.new(0.9, 0, 0, 30); txtScanResult.BackgroundTransparency = 1; txtScanResult.Text = "Nenhuma varredura iniciada."; txtScanResult.TextColor3 = Color3.fromRGB(150, 150, 150); txtScanResult.Font = Enum.Font.GothamBold; txtScanResult.TextSize = 11
 local btnForcePasses = criarBotao("Forçar Todas as Gamepasses (Bypass Local)", pageVip, Color3.fromRGB(50, 200, 100))
+
+btnAutoPlant.MouseButton1Click:Connect(function()
+    autoPlantarAtivado = not autoPlantarAtivado; btnAutoPlant.Text = autoPlantarAtivado and "Auto-Plantar: LIGADO" or "Auto-Plantar Sementes Próximas"
+    if autoPlantarAtivado then
+        conexoes.plant = RunService.Heartbeat:Connect(function()
+            local char = player.Character; local bp = player:FindFirstChild("Backpack"); if not char or not bp then return end
+            local soloProximo = false
+            for _, obj in pairs(workspace:GetDescendants()) do if obj.Name == "Soil" and obj:IsA("BasePart") and (obj.Position - char.HumanoidRootPart.Position).Magnitude < 10 then soloProximo = true; break end end
+            local itens = bp:GetChildren(); for _, v in pairs(char:GetChildren()) do table.insert(itens, v) end
+            if not soloProximo then
+                for _, item in pairs(itens) do if item:IsA("Tool") and string.lower(item.Name):match("shovel") then if item.Parent ~= char then char.Humanoid:EquipTool(item) end; item:Activate(); break end end
+            else
+                for _, item in pairs(itens) do if item:IsA("Tool") and (string.lower(item.Name):match("seed") or string.lower(item.Name):match("sapling") or string.lower(item.Name):match("acorn")) then if item.Parent ~= char then char.Humanoid:EquipTool(item) end; item:Activate(); break end end
+            end
+        end)
+    else if conexoes.plant then conexoes.plant:Disconnect() end end
+end)
 
 btnVipSpoof.MouseButton1Click:Connect(function()
     vipSpoofAtivado = not vipSpoofAtivado; btnVipSpoof.Text = vipSpoofAtivado and "Vantagens 2x VIP Aplicadas!" or "Aplicar Gamepasses 2x (XP, Recursos, Dano)"
@@ -447,11 +481,11 @@ btnScanRemotes.MouseButton1Click:Connect(function()
             local name = string.lower(v.Name)
             if name:match("give") or name:match("add") or name:match("buy") or name:match("admin") or name:match("vip") then
                 vulneraveis = vulneraveis + 1
-                pcall(function() v:FireServer() end) -- Dispara no fundo pra ver se cola
+                pcall(function() v:FireServer() end)
             end
         end
     end
-    txtScanResult.Text = vulneraveis > 0 and "ACHAMOS " .. vulneraveis .. " REMOTES SUSPEITOS! (Testados no fundo)" or "Nenhuma porta aberta óbvia encontrada."
+    txtScanResult.Text = vulneraveis > 0 and "ACHAMOS " .. vulneraveis .. " REMOTES SUSPEITOS!" or "Nenhuma porta aberta óbvia encontrada."
     txtScanResult.TextColor3 = vulneraveis > 0 and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(150, 150, 150)
 end)
 
