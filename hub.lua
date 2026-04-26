@@ -1,5 +1,5 @@
 -- ==========================================
--- THE SURVIVAL GAME: GOD HUB V23 (EVOLUÇÃO MÁXIMA)
+-- THE SURVIVAL GAME: GOD HUB V24 (EXPLOIT EDITION)
 -- ==========================================
 
 local Players = game:GetService("Players")
@@ -24,12 +24,10 @@ local farmSeguroAtivado, ignorarAgua = false, true
 local savedRespawnCFrame = nil
 local velocidadeAtual, puloAtual = 16, 50
 
--- Novos Estados VIP
 local vipSpoofAtivado, cosmeticosAtivados = false, false
 
--- Filtros de Farm
+-- Filtros
 local farmFiltros = {Madeira=false, Pedra=false, Carvao=false, Cobre=false, Ferro=false, Ouro=false, Bluesteel=false, Obsidian=false, Arbusto=false}
--- Filtros de ESP
 local espFiltros = {Arvores=false, Arbustos=false, Animais=false, Bosses=false, Ouro=false, Pedra=false, Carvao=false, Bluesteel=false, Obsidian=false, Ferro=false, Cobre=false}
 
 local recursosCache = {} 
@@ -40,7 +38,7 @@ local conexoes = {}
 -- CRIAÇÃO DA INTERFACE BASE
 -- ==========================================
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TSG_God_Hub_V23"
+screenGui.Name = "TSG_God_Hub_V24"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = player:WaitForChild("PlayerGui") end
@@ -57,7 +55,7 @@ Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
 
 local titleText = Instance.new("TextLabel", titleBar)
 titleText.Size = UDim2.new(0.6, 0, 1, 0); titleText.Position = UDim2.new(0.05, 0, 0, 0)
-titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V23 (MAX EDITION)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.BackgroundTransparency = 1; titleText.Text = "TSG GOD HUB V24 (EXPLOIT EDITION)"; titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleText.Font = Enum.Font.GothamBold; titleText.TextSize = 12; titleText.TextXAlignment = Enum.TextXAlignment.Left
 
 local closeBtn = Instance.new("TextButton", titleBar)
@@ -93,7 +91,7 @@ local pageFarm, tabFarm = criarAba("Farm")
 local pageEsp, tabEsp = criarAba("Visuals")
 local pageCombat, tabCombat = criarAba("Combate")
 local pagePlayer, tabPlayer = criarAba("Jogador")
-local pageVip, tabVip = criarAba("VIP/Trolls") -- Trolls renomeado para VIP
+local pageVip, tabVip = criarAba("Exploits") 
 
 pageFarm.Visible = true; tabFarm.TextColor3 = corTema
 
@@ -217,7 +215,7 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
             local maisProx = nil; local mDist = math.huge; local tipoR = nil
             for _, rec in ipairs(recursosCache) do
                 if farmFiltros[rec.tipo] and rec.part and rec.part.Parent then
-                    if ignorarAgua and rec.part.Position.Y < 13 then continue end -- Nível do mar aprox. 13-14
+                    if ignorarAgua and rec.part.Position.Y < 13 then continue end 
                     local dist = (rec.part.Position - hrp.Position).Magnitude
                     if dist < mDist then mDist = dist; maisProx = rec.part; tipoR = rec.tipo end
                 end
@@ -234,11 +232,11 @@ btnAutoFarmNodes.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ABA 2: VISUALS (ESP MÁXIMO)
+-- ABA 2: VISUALS (ESP FILTRADO)
 -- ==========================================
 Instance.new("Frame", pageEsp).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Rastreador Universal", pageEsp)
+criarDivisoria("Filtros do ESP", pageEsp)
 local frameFiltrosEsp = Instance.new("Frame", pageEsp); frameFiltrosEsp.Size = UDim2.new(0.9, 0, 0, 110); frameFiltrosEsp.BackgroundTransparency = 1
 local layoutFiltrosEsp = Instance.new("UIGridLayout", frameFiltrosEsp); layoutFiltrosEsp.CellSize = UDim2.new(0.31, 0, 0, 25); layoutFiltrosEsp.CellPadding = UDim2.new(0, 5, 0, 5)
 for nome, _ in pairs(espFiltros) do
@@ -268,11 +266,11 @@ btnLigaEsp.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- ABA 3: COMBATE E SOBREVIVÊNCIA
+-- ABA 3: COMBATE (KILL AURA MÁXIMA)
 -- ==========================================
 Instance.new("Frame", pageCombat).Size = UDim2.new(1,0,0,1)
 
-criarDivisoria("Kill Aura e Dano", pageCombat)
+criarDivisoria("Sistemas de Mira e Dano", pageCombat)
 local btnKillAura = criarBotao("Kill Aura (Players, Bosses, Animais)", pageCombat, Color3.fromRGB(150, 50, 50))
 local txtKillInfo = Instance.new("TextLabel", pageCombat); txtKillInfo.Size = UDim2.new(0.9, 0, 0, 20); txtKillInfo.BackgroundTransparency = 1; txtKillInfo.Text = "Usa a melhor Espada ou Pedra Afiada automaticamente."; txtKillInfo.TextColor3 = Color3.fromRGB(150,150,150); txtKillInfo.Font = Enum.Font.Gotham; txtKillInfo.TextSize = 11
 
@@ -328,7 +326,7 @@ btnStamina.MouseButton1Click:Connect(function() staminaInfinita = not staminaInf
 btnFome.MouseButton1Click:Connect(function() semFomeAtivado = not semFomeAtivado; btnFome.Text = semFomeAtivado and "Sem Fome: ATIVADO" or "Sem Fome (Travar Barra)" end)
 
 -- ==========================================
--- ABA 4: JOGADOR (PESO, REBIRTH E RESPAWN)
+-- ABA 4: JOGADOR E RESPAWN
 -- ==========================================
 Instance.new("Frame", pagePlayer).Size = UDim2.new(1,0,0,1)
 
@@ -348,19 +346,15 @@ local btnTpRespawn = criarBotao("2. Teleportar para Local Salvo Agora", pagePlay
 
 btnPeso.MouseButton1Click:Connect(function() inventarioIlimitado = not inventarioIlimitado; btnPeso.Text = inventarioIlimitado and "Ignorar Peso: ATIVADO" or "Forçar Velocidade (Ignora Inventário)" end)
 
--- O NOVO AUTO-REBIRTH: Burla os stats locais e aperta o botão do Gui
 btnAutoRebirth.MouseButton1Click:Connect(function()
     autoRebirthAtivado = not autoRebirthAtivado; btnAutoRebirth.Text = autoRebirthAtivado and "Auto Rebirth: RODANDO" or "Auto Rebirth (Simula Lvl 25 e Clica na GUI)"
     if autoRebirthAtivado then
         conexoes.rebirth = RunService.Heartbeat:Connect(function()
-            -- Força nível 25 nas skills locais para liberar o botão
             local skills = player:FindFirstChild("Skills") or player:FindFirstChild("leaderstats") or player
             for _, s in pairs({"Mining", "Woodcutting", "Crafting", "Food", "Cooking"}) do
                 local stat = skills:FindFirstChild(s, true)
                 if stat and (stat:IsA("IntValue") or stat:IsA("NumberValue")) then stat.Value = 25 end
             end
-            
-            -- Clica no botão GUI de Rebirth
             for _, gui in pairs(player.PlayerGui:GetDescendants()) do
                 if gui:IsA("TextButton") and (string.lower(gui.Text):match("rebirth") or string.lower(gui.Name):match("rebirth")) then
                     pcall(function() for _, conn in pairs(getconnections(gui.MouseButton1Click)) do conn:Fire() end end)
@@ -409,29 +403,30 @@ player.CharacterAdded:Connect(function(char)
 end)
 
 -- ==========================================
--- ABA 5: VIP E GAMEPASSES VISUAIS
+-- ABA 5: EXPLOITS, VIP E TROLLS
 -- ==========================================
 Instance.new("Frame", pageVip).Size = UDim2.new(1,0,0,1)
 
 local infoVip = Instance.new("TextLabel", pageVip)
 infoVip.Size = UDim2.new(0.9, 0, 0, 55); infoVip.BackgroundTransparency = 1
-infoVip.Text = "AVISO: Estes botões alteram a UI para simular Gamepasses e VIPs no seu PC. Como o servidor da Roblox é fechado, multiplicadores são visuais."
+infoVip.Text = "O Scanner procura portas abertas (RemoteEvents) no mapa. Gamepasses 2x forçam visualmente a interface para te dar vantagem estética."
 infoVip.TextColor3 = Color3.fromRGB(255, 100, 100); infoVip.TextWrapped = true; infoVip.Font = Enum.Font.GothamBold; infoVip.TextSize = 11
 
 criarDivisoria("Vantagens Premium", pageVip)
 local btnVipSpoof = criarBotao("Aplicar Gamepasses 2x (XP, Recursos, Dano)", pageVip, Color3.fromRGB(200, 150, 0))
 local btnCosmetics = criarBotao("Desbloquear Montarias Perigosas (Client)", pageVip, Color3.fromRGB(150, 50, 200))
 
+criarDivisoria("Scanner de Vulnerabilidades", pageVip)
+local btnScanRemotes = criarBotao("Escanear Vulnerabilidades (Portas Abertas)", pageVip, Color3.fromRGB(200, 100, 50))
+local txtScanResult = Instance.new("TextLabel", pageVip); txtScanResult.Size = UDim2.new(0.9, 0, 0, 30); txtScanResult.BackgroundTransparency = 1; txtScanResult.Text = "Nenhuma varredura iniciada."; txtScanResult.TextColor3 = Color3.fromRGB(150, 150, 150); txtScanResult.Font = Enum.Font.GothamBold; txtScanResult.TextSize = 11
+local btnForcePasses = criarBotao("Forçar Todas as Gamepasses (Bypass Local)", pageVip, Color3.fromRGB(50, 200, 100))
+
 btnVipSpoof.MouseButton1Click:Connect(function()
     vipSpoofAtivado = not vipSpoofAtivado; btnVipSpoof.Text = vipSpoofAtivado and "Vantagens 2x VIP Aplicadas!" or "Aplicar Gamepasses 2x (XP, Recursos, Dano)"
     if vipSpoofAtivado then
-        -- Simulação Visual de 2x nas UIs locais
         for _, gui in pairs(player.PlayerGui:GetDescendants()) do
-            if gui:IsA("TextLabel") and gui.Text:match("XP") then
-                gui.Text = "2x " .. gui.Text
-            elseif gui:IsA("TextLabel") and gui.Text:match("Damage") then
-                gui.Text = "Dano 200% (Spoofed)"
-            end
+            if gui:IsA("TextLabel") and gui.Text:match("XP") then gui.Text = "2x " .. gui.Text
+            elseif gui:IsA("TextLabel") and gui.Text:match("Damage") then gui.Text = "Dano 200% (Spoofed)" end
         end
     end
 end)
@@ -439,16 +434,39 @@ end)
 btnCosmetics.MouseButton1Click:Connect(function()
     cosmeticosAtivados = not cosmeticosAtivados; btnCosmetics.Text = cosmeticosAtivados and "Montarias Desbloqueadas Localmente!" or "Desbloquear Montarias Perigosas (Client)"
     if cosmeticosAtivados then
-        -- Se o jogo guardar cosméticos no ReplicatedStorage, tentamos clonar para o player
-        local rep = game:GetService("ReplicatedStorage")
-        local mounts = rep:FindFirstChild("Mounts") or rep:FindFirstChild("Cosmetics")
-        if mounts then
-            for _, mount in pairs(mounts:GetChildren()) do
-                -- Exemplo de tentar puxar pro char
-                if mount:IsA("Model") then mount:Clone().Parent = player.Character end
+        local rep = game:GetService("ReplicatedStorage"); local mounts = rep:FindFirstChild("Mounts") or rep:FindFirstChild("Cosmetics")
+        if mounts then for _, mount in pairs(mounts:GetChildren()) do if mount:IsA("Model") then mount:Clone().Parent = player.Character end end end
+    end
+end)
+
+btnScanRemotes.MouseButton1Click:Connect(function()
+    txtScanResult.Text = "Escaneando ReplicatedStorage..."; task.wait(1)
+    local vulneraveis = 0
+    for _, v in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if v:IsA("RemoteEvent") then
+            local name = string.lower(v.Name)
+            if name:match("give") or name:match("add") or name:match("buy") or name:match("admin") or name:match("vip") then
+                vulneraveis = vulneraveis + 1
+                pcall(function() v:FireServer() end) -- Dispara no fundo pra ver se cola
             end
         end
     end
+    txtScanResult.Text = vulneraveis > 0 and "ACHAMOS " .. vulneraveis .. " REMOTES SUSPEITOS! (Testados no fundo)" or "Nenhuma porta aberta óbvia encontrada."
+    txtScanResult.TextColor3 = vulneraveis > 0 and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(150, 150, 150)
+end)
+
+btnForcePasses.MouseButton1Click:Connect(function()
+    for _, v in pairs(player:GetDescendants()) do
+        if (v:IsA("BoolValue") or v:IsA("IntValue")) then
+            local name = string.lower(v.Name)
+            if name:match("vip") or name:match("pass") or name:match("premium") or name:match("owned") then
+                if v:IsA("BoolValue") then v.Value = true end
+                if v:IsA("IntValue") then v.Value = 1 end
+            end
+        end
+    end
+    btnForcePasses.Text = "Valores VIP Locais Ativados!"
+    task.wait(2); btnForcePasses.Text = "Forçar Todas as Gamepasses (Bypass Local)"
 end)
 
 -- ==========================================
